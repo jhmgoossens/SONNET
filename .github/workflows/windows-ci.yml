@@ -48,7 +48,7 @@ jobs:
 
       - name: Checkout COIN-OR dependencies sources
         run: |
-          if (${{ github.event.head_commit.message }} -like '*use fork*' ) 
+          if ('${{ github.event.head_commit.message }}' -like '*use fork*' ) 
           { 
             echo "For dependencies, use fork repo"
             git clone --depth 1 https://github.com/jhmgoossens/BuildTools.git -b master BuildTools
