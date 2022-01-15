@@ -1,0 +1,65 @@
+name: Windows Build and Test
+
+on:
+  push:
+  pull_request:
+
+#env:
+  # Path to the solution file relative to the root of the project.
+#  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+#  BUILD_CONFIGURATION: Release
+
+jobs:
+  build_and_test:
+    runs-on: windows-latest
+    steps:
+      - run: echo "${{ toJSON(github) }}"
+      - uses: nuget/setup-nuget@v1
+      - uses: microsoft/setup-msbuild@v1.0.2
+      - uses: darenm/setup-vstest@v1
+     
+      - name: Checkout Sonnet sources
+        uses: actions/checkout@v2
+        with:
+          path: Sonnet
+
+      - run: nuget restore Sonnet\MSVisualStudio\v16\Sonnet.sln
+
+      - name: Checkout COIN-OR dependencies sources
+        run: |
+          if (${{ github.event.head_commit.message }} -like '*use fork*' ) 
+          { 
+            echo "For dependencies, use fork repo"
+            git clone --depth 1 https://github.com/jhmgoossens/BuildTools.git -b master BuildTools
+            git clone --depth 1 https://github.com/jhmgoossens/Cbc.git -b dev Cbc
+            git clone --depth 1 https://github.com/jhmgoossens/Clp.git -b dev Clp
+            git clone --depth 1 https://github.com/jhmgoossens/Cgl.git -b dev Cgl
+            git clone --depth 1 https://github.com/jhmgoossens/CoinUtils.git -b dev CoinUtils
+            git clone --depth 1 https://github.com/jhmgoossens/Osi.git -b dev Osi
+          } else {
+            echo "For dependencies, use coin-or repo (default, unless use fork is mentioned in the commit message)"
+            git clone --depth 1 https://github.com/coin-or-tools/BuildTools.git -b master BuildTools
+            git clone --depth 1 https://github.com/coin-or/Cbc.git -b master Cbc
+            git clone --depth 1 https://github.com/coin-or/Clp.git -b master Clp
+            git clone --depth 1 https://github.com/coin-or/Cgl.git -b master Cgl
+            git clone --depth 1 https://github.com/coin-or/CoinUtils.git -b master CoinUtils
+            git clone --depth 1 https://github.com/coin-or/Osi.git -b master Osi
+          }
+          
+      - name: Build Sonnet Solution
+        run: |
+          echo "-- Build_script"
+          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release;Platform=x64
+          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release;Platform=x86
+      
+      - name: Test Sonnet
+        run: |
+          vstest.console Sonnet\MSVisualStudio\v16\SonnetTest\bin\x64\Release\net5.0\SonnetTest.exe
+          vstest.console Sonnet\MSVisualStudio\v16\SonnetTest\bin\x86\Release\net5.0\SonnetTest.exe
+          vstest.console Sonnet\MSVisualStudio\v16\SonnetTestNET4\bin\x64\Release\SonnetTest.exe
+          vstest.console Sonnet\MSVisualStudio\v16\SonnetTestNET4\bin\x86\Release\SonnetTest.exe
+
