@@ -71,8 +71,8 @@ jobs:
       - name: Build Sonnet Solution
         run: |
           echo "-- Build_script"
-          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release;Platform=x64
-          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release;Platform=x86
+          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release /p:Platform=x64
+          MSBuild Sonnet\MSVisualStudio\v16\Sonnet.sln /p:Configuration=Release /p:Platform=x86
       
       - name: Test Sonnet
         run: |
