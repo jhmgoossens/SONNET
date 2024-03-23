@@ -16,12 +16,6 @@ jobs:
     name: Build and Test
     runs-on: windows-2022
     steps:
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v40
-        # This version of the action has a Vulnerability CVE-2023-51664.
-        # Testing if dependabot picks up on this
-
       - name: Setup environment
         run: |
           echo "builddate=$(Get-Date -format r)" >> $env:GITHUB_ENV
@@ -39,6 +33,12 @@ jobs:
         with:
           path: Sonnet
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        # This version of the action has a Vulnerability CVE-2023-51664.
+        # Testing if dependabot picks up on this
+        
       - name: Checkout dependenies sources
         shell: cmd
         run: |
