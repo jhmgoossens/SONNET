@@ -33,6 +33,12 @@ jobs:
         with:
           path: Sonnet
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        # This version of the action has a Vulnerability CVE-2023-51664.
+        # Testing if dependabot picks up on this
+        
       - name: Checkout dependenies sources
         shell: cmd
         run: |
